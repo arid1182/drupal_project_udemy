@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
+
+    ports:
+       - target: 5432
+         published: 5432
+         mode: ingress
+
+    secrets:
+      - pg_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    deploy:
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      restart_policy:
+        condition: any
+    networks:
+      - dp_network
+
+  drupal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: drupal_custom:latest
+    depends_on:
+      - postgres
+    labels: [app === drupal]
+    ports:
+      - target: 80
+        published: 80
+        mode: ingress
+    volumes:
+      - drupal_modules:/var/www/html/modules
+      - drupal_themes:/var/www/html/themes
+      - drupal_profiles:/var/www/html/profiles
+      - drupal_sites:/var/www/html/sites
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      placement:
+        constraints: [node.role == worker]
+      restart_policy:
+        condition: on_failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+    networks:
+      - dp_network
+
+volumes:
+  pg_data:
+  drupal_modules:
+  drupal_themes:
+  drupal_profiles:
+  drupal_sites:
+
+
+networks:
+  dp_network:
+    driver: overlay
+
+secrets:
+  pg_password:
+    external: true
