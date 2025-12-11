@@ -28,9 +28,6 @@ services:
       - dp_network
 
   drupal:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: drupal_custom:latest
     depends_on:
       - postgres
