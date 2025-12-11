@@ -28,7 +28,7 @@ services:
       - dp_network
 
   drupal:
-    image: drupal_custom:latest
+    image: localhost:5000/drupal_custom:latest
     depends_on:
       - postgres
     labels: [app === drupal]
