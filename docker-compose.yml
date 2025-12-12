@@ -8,12 +8,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
       POSTGRES_PASSWORD_FILE: /run/secrets/pg_password
-
     ports:
        - target: 5432
          published: 5432
          mode: ingress
-
     secrets:
       - pg_password
     volumes:
@@ -62,7 +60,6 @@ volumes:
   drupal_themes:
   drupal_profiles:
   drupal_sites:
-
 
 networks:
   dp_network:
